@@ -47,7 +47,7 @@ function refreshTable() {
             <td>${word.description || ""}</td>
             <td>
                 <button class="delete-btn" onclick="deleteWord(${index})">
-                    🗑️
+                    Supprimer
                 </button>
             </td>
         </tr>

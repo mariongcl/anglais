@@ -116,7 +116,7 @@ th,td{
 
 .card-back {
     transform: rotateY(180deg);
-    color: #2563eb;
+    color: #C493BF;
 }
 
 .card-container:hover .card-inner:not(.is-flipped) {

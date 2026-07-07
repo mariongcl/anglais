@@ -99,7 +99,7 @@ section{
     background:#be185d;
 }
 
-/* --- Tableau & Mode Édition Mobile-Friendly --- */
+/* --- Tableau & Mode Édition --- */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -140,7 +140,7 @@ th,td{
     font-size: 0.95rem;
 }
 
-/* --- Système de Carte 3D Animée --- */
+/* --- Système de Carte 3D --- */
 .card-container {
     perspective: 1000px;
     width: 100%;
@@ -186,7 +186,7 @@ th,td{
 .card-back {
     transform: rotateY(180deg);
     color: #db2777;
-    background: #FFFCFC;
+    background: #fff5f7;
 }
 
 .card-container:hover .card-inner:not(.is-flipped) {
@@ -224,7 +224,6 @@ button{
     font-family: inherit;
 }
 
-/* Bouton commencer */
 .commencer {
     background: none;
     padding: 0;
@@ -256,23 +255,17 @@ button{
     transition: 0.3s ease-out;
 }
 
-.commencer:hover::after {
-    width: 100%;
-}
-.commencer:hover p {
-    color: var(--hovered-color);
-}
+.commencer:hover::after { width: 100%; }
+.commencer:hover p { color: var(--hovered-color); }
 
-/* Boutons d'action cartes */
 .good{ background:#22c55e; color:white; }
 .good:hover{ background:#1aa34c; }
 
 .bad{ background:#ef4444; color:white; }
 .bad:hover{ background:#d13030; }
 
-/* Boutons d'action tableau */
-.edit-btn { background: #493A98; color: white; padding: 6px 12px; border-radius: 6px; margin-right: 4px;}
-.edit-btn:hover { background: #5946B9; }
+.edit-btn { background: #0284c7; color: white; padding: 6px 12px; border-radius: 6px; margin-right: 4px;}
+.edit-btn:hover { background: #0369a1; }
 
 .delete-btn{ background:#dc2626; color:white; padding:6px 12px; border-radius:4px; }
 .delete-btn:hover{ background:#b91c1c; }
@@ -292,7 +285,6 @@ button{
 }
 .reset:hover { background: #475569; }
 
-/* Titres H1 */
 h1 {
     font-size: 2.2rem;
     color: #1e1b4b;
@@ -317,21 +309,18 @@ h1::after {
 }
 
 /* --- MEDIA QUERIES (RESPONSIVE) --- */
-
 @media(max-width: 768px) {
-    /* Menu sur mobile */
     nav {
         flex-wrap: wrap;
         padding: 10px;
         gap: 8px;
     }
     nav button {
-        flex: 1 1 calc(50% - 8px); /* 2 boutons par ligne */
+        flex: 1 1 calc(50% - 8px);
         padding: 10px;
         font-size: 0.9rem;
     }
 
-    /* Formulaire d'ajout vertical */
     .add-word {
         flex-direction: column;
         gap: 8px;
@@ -340,72 +329,22 @@ h1::after {
         width: 100%;
     }
 
-    /* Transformation du tableau en liste de bloc "Cards" pour éviter le scroll */
-    table, thead, tbody, th, td, tr { 
-        display: block; 
-    }
-    
-    thead tr { 
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-    
-    tr { 
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        padding: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
-    
-    td { 
-        border: none;
-        border-bottom: 1px solid #f1f5f9; 
-        position: relative;
-        padding-left: 45%; 
-        text-align: right;
-    }
-    
-    td:last-child {
-        border-bottom: none;
-        text-align: center;
-        padding-left: 14px;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-    }
+    table, thead, tbody, th, td, tr { display: block; }
+    thead tr { position: absolute; top: -9999px; left: -9999px; }
+    tr { background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; padding: 10px; }
+    td { border: none; border-bottom: 1px solid #f1f5f9; position: relative; padding-left: 45%; text-align: right; }
+    td:last-child { border-bottom: none; text-align: center; padding-left: 14px; display: flex; justify-content: center; gap: 10px; }
 
-    /* Ajout des labels automatiques en face des valeurs */
     td:nth-of-type(1):before { content: "Anglais :"; left: 14px; position: absolute; font-weight: bold; text-align: left; }
     td:nth-of-type(2):before { content: "Français :"; left: 14px; position: absolute; font-weight: bold; text-align: left; }
     td:nth-of-type(3):before { content: "Description :"; left: 14px; position: absolute; font-weight: bold; text-align: left; }
-    
-    .table-input {
-        width: 100%;
-        text-align: right;
-    }
+    .table-input { width: 100%; text-align: right; }
 }
 
 @media(max-width: 480px){
-    h1 {
-        font-size: 1.8rem;
-    }
-    
-    nav button {
-        flex: 1 1 100%; /* 1 bouton par ligne sur très petit écran */
-    }
-
-    .card-container {
-        height: 220px;
-    }
-
-    .card-front, .card-back {
-        font-size: 1.6rem;
-    }
-    
-    .stats {
-        font-size: 1rem;
-    }
+    h1 { font-size: 1.8rem; }
+    nav button { flex: 1 1 100%; }
+    .card-container { height: 220px; }
+    .card-front, .card-back { font-size: 1.6rem; }
+    .stats { font-size: 1rem; }
 }

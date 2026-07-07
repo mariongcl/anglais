@@ -2,16 +2,10 @@
 const SUPABASE_URL = "https://xxblzfxzvclmuhnwoyvk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_pSkke6fICR5b0U2fAFF6Dw_N3ImOwYS";
 
-// Corrigé : on ne peut pas nommer le client "supabase" quand la librairie
-// globale s'appelle déjà "supabase". "const supabase = supabase.createClient(...)"
-// tente de lire la variable avant qu'elle soit initialisée -> ReferenceError
-// dès la première ligne exécutée, qui bloque tout le reste du script (donc
-// plus aucun bouton ne répond).
+// Utilisation de supabaseClient pour éviter le conflit avec la librairie globale
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- Accès sécurisé au localStorage (progression + page courante) ---
-// Si localStorage est bloqué (navigation privée, aperçu en iframe, etc.),
-// on bascule sur un repli en mémoire au lieu de planter tout le script.
 const memoryFallback = {};
 
 function storageGet(key) {
@@ -34,10 +28,7 @@ function storageSet(key, value) {
 
 let ALL_WORDS = [];
 
-// Corrigé : la progression est maintenant indexée sur l'id stable du mot
-// (fourni par Supabase) plutôt que sur son texte anglais/français. Avant,
-// renommer un mot lui faisait perdre sa progression (ou la transférait
-// vers un autre mot ayant le même texte).
+// La progression suit désormais l'ID stable généré par Supabase
 let successENFR = JSON.parse(storageGet("successENFR")) || [];
 let successFREN = JSON.parse(storageGet("successFREN")) || [];
 
@@ -51,12 +42,11 @@ let sortColumn = null;
 let sortDirection = 1;
 let editingIndex = null;
 
-// Charge l'ensemble des mots depuis la bdd Supabase
+// Charge l'ensemble des mots depuis la bdd Supabase (Tri nettoyé pour éviter l'erreur 400)
 async function loadWordsFromCloud() {
     const { data, error } = await supabaseClient
         .from('words')
-        .select('*')
-        .order('created_at', { ascending: true });
+        .select('*');
 
     if (error) {
         console.error("Erreur lors du chargement des mots:", error);
@@ -98,10 +88,6 @@ function refreshTable() {
     const body = document.getElementById("tableBody");
     body.innerHTML = "";
 
-    // Corrigé : construction des lignes via le DOM plutôt que par
-    // concaténation de chaînes HTML. Avant, un mot/id/description contenant
-    // un guillemet, un tiret (cas des UUID Supabase) ou un caractère "<"
-    // pouvait casser le HTML généré ou les attributs onclick.
     ALL_WORDS.forEach((word, index) => {
         const tr = document.createElement("tr");
 
@@ -167,7 +153,7 @@ function makeEditableCell(id, value) {
     input.type = "text";
     input.id = id;
     input.className = "table-input";
-    input.value = value; // assignation via la propriété JS -> aucune injection HTML possible
+    input.value = value;
     td.appendChild(input);
     return td;
 }
@@ -203,9 +189,6 @@ async function saveEdit(index, id) {
         return;
     }
 
-    // Plus besoin de remapper successENFR/successFREN à la main ici :
-    // la progression suit l'id du mot, pas son texte, donc un renommage
-    // ne casse plus rien.
     editingIndex = null;
     await loadWordsFromCloud();
 }
@@ -253,8 +236,6 @@ async function deleteWord(index, id) {
         return;
     }
 
-    // Nettoyage : on retire aussi l'id des listes de progression pour
-    // éviter qu'il reste orphelin indéfiniment dans le localStorage.
     successENFR = successENFR.filter(x => x !== id);
     successFREN = successFREN.filter(x => x !== id);
 
@@ -267,10 +248,6 @@ async function deleteWord(index, id) {
 function sortTable(column) {
     editingIndex = null;
 
-    // Corrigé : on n'inverse le sens du tri que si on reclique sur la
-    // même colonne. Avant, la direction restait partagée entre toutes les
-    // colonnes, ce qui donnait un tri décroissant surprenant au premier
-    // clic sur une nouvelle colonne.
     if (sortColumn === column) {
         sortDirection *= -1;
     } else {

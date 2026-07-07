@@ -18,113 +18,113 @@
     <button onclick="showPage('fren')">🇫🇷 ➜ 🇬🇧</button>
 </nav>
 
-<section id="home-page">
-    <h1>Entrainement anglais</h1>
+<main class="container">
+    <section id="home-page">
+        <h1>Entrainement anglais</h1>
 
-    <div class="home-box">
-        <p>
-            Nombre total de mots :
-            <b id="totalWordsHome">0</b>
+        <div class="home-box">
+            <p>
+                Nombre total de mots :
+                <b id="totalWordsHome">0</b>
+            </p>
+
+            <p>
+                Utilise les flashcards pour apprendre ton vocabulaire.
+            </p>
+
+            <button class="commencer" onclick="showPage('enfr')">
+                <p>Commencer</p>
+            </button>
+        </div>
+    </section>
+
+    <section id="list-page" class="hidden">
+        <h1>Tous les mots</h1>
+
+        <p class="total-count">
+            Total : <b id="totalWords">0</b> mots
         </p>
 
-        <p>
-            Utilise les flashcards pour apprendre ton vocabulaire.
-        </p>
+        <div class="add-word">
+            <input id="newEnglish" placeholder="Mot anglais">
+            <input id="newFrench" placeholder="Mot français">
+            <input id="newDescription" placeholder="Description">
+            <button class="ajouter" onclick="addWord()">Ajouter</button>
+        </div>
 
-        <button class="commencer" onclick="showPage('enfr')">
-            Commencer
-        </button>
-    </div>
-</section>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('en')">Anglais</th>
+                        <th onclick="sortTable('fr')">Français</th>
+                        <th onclick="sortTable('description')">Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </section>
 
-<section id="list-page" class="hidden">
-    <h1>Tous les mots</h1>
+    <section id="enfr-page" class="hidden">
+        <h1>Anglais vers Français</h1>
 
-    <p>
-        Total :
-        <b id="totalWords">0</b>
-        mots
-    </p>
+        <div class="stats">
+            <div>À apprendre : <b id="left-enfr">0</b></div>
+            <div>Réussi : <b id="right-enfr">0</b></div>
+        </div>
 
-    <div class="add-word">
-        <input id="newEnglish" placeholder="Mot anglais">
-        <input id="newFrench" placeholder="Mot français">
-        <input id="newDescription" placeholder="Description">
-        <button class="ajouter" onclick="addWord()">
-            Ajouter
-        </button>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th onclick="sortTable('en')">Anglais</th>
-                <th onclick="sortTable('fr')">Français</th>
-                <th onclick="sortTable('description')">Description</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
-</section>
-
-<section id="enfr-page" class="hidden">
-    <h1>Anglais ➜ Français</h1>
-
-    <div class="stats">
-        <div>À apprendre : <b id="left-enfr">0</b></div>
-        <div>Réussi : <b id="right-enfr">0</b></div>
-    </div>
-
-    <div class="card-container" onclick="flipENFR()">
-        <div class="card-inner" id="card-enfr-inner">
-            <div class="card-front">
-                <div id="card-enfr-text-front"></div>
-            </div>
-            <div class="card-back">
-                <div id="card-enfr-text-back"></div>
+        <div class="card-container" onclick="flipENFR()">
+            <div class="card-inner" id="card-enfr-inner">
+                <div class="card-front">
+                    <div id="card-enfr-text-front"></div>
+                </div>
+                <div class="card-back">
+                    <div id="card-enfr-text-back"></div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="actions">
-        <button class="bad" onclick="wrongCard()">Faux</button>
-        <button class="good" onclick="successCard()">Correct</button>
-    </div>
+        <div class="actions">
+            <button class="bad" onclick="wrongCard()">Faux</button>
+            <button class="good" onclick="successCard()">Correct</button>
+        </div>
 
-    <button class="reset" onclick="resetProgress()">
-        Réinitialiser la progression
-    </button>
-</section>
+        <button class="reset" onclick="resetProgress()">
+            Réinitialiser la progression
+        </button>
+    </section>
 
-<section id="fren-page" class="hidden">
-    <h1>Français ➜ Anglais</h1>
+    <section id="fren-page" class="hidden">
+        <h1>Français vers Anglais</h1>
 
-    <div class="stats">
-        <div>À apprendre : <b id="left-fren">0</b></div>
-        <div>Réussi : <b id="right-fren">0</b></div>
-    </div>
+        <div class="stats">
+            <div>À apprendre : <b id="left-fren">0</b></div>
+            <div>Réussi : <b id="right-fren">0</b></div>
+        </div>
 
-    <div class="card-container" onclick="flipFREN()">
-        <div class="card-inner" id="card-fren-inner">
-            <div class="card-front">
-                <div id="card-fren-text-front"></div>
-            </div>
-            <div class="card-back">
-                <div id="card-fren-text-back"></div>
+        <div class="card-container" onclick="flipFREN()">
+            <div class="card-inner" id="card-fren-inner">
+                <div class="card-front">
+                    <div id="card-fren-text-front"></div>
+                </div>
+                <div class="card-back">
+                    <div id="card-fren-text-back"></div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="actions">
-        <button class="bad" onclick="wrongCardFR()">Faux</button>
-        <button class="good" onclick="successCardFR()">Correct</button>
-    </div>
+        <div class="actions">
+            <button class="bad" onclick="wrongCardFR()">Faux</button>
+            <button class="good" onclick="successCardFR()">Correct</button>
+        </div>
 
-    <button class="reset" onclick="resetProgress()">
-        Réinitialiser la progression
-    </button>
-</section>
+        <button class="reset" onclick="resetProgress()">
+            Réinitialiser la progression
+        </button>
+    </section>
+</main>
 
 </body>
 </html>

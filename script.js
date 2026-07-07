@@ -352,21 +352,34 @@ function flipFREN() {
     isFlippedFREN = !isFlippedFREN;
     document.getElementById("card-fren-inner").classList.toggle("is-flipped");
 }
+function successCard() {
+    if (!currentENFR) return;
 
-function successCardFR() {
-    if (!currentFREN) return;
-
-    if (!successFREN.includes(currentFREN.id)) {
-        successFREN.push(currentFREN.id);
+    if (!successENFR.includes(currentENFR.id)) {
+        successENFR.push(currentENFR.id);
         saveLocalProgress();
     }
-    nextFREN();
+    
+    // Si la carte était retournée, on la remet à l'endroit d'abord
+    if (isFlippedENFR) {
+        flipENFR();
+        // On attend 300ms (temps de l'animation CSS) avant de passer au mot suivant
+        setTimeout(nextENFR, 450);
+    } else {
+        nextENFR();
+    }
 }
 
-function wrongCardFR() {
-    nextFREN();
+function wrongCard() {
+    if (!currentENFR) return;
+    
+    if (isFlippedENFR) {
+        flipENFR();
+        setTimeout(nextENFR, 450);
+    } else {
+        nextENFR();
+    }
 }
-
 function resetProgress() {
     successENFR = [];
     successFREN = [];

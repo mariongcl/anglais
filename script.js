@@ -168,7 +168,6 @@ function cancelEdit() {
     refreshTable();
 }
 
-// Modifie un mot sur Supabase
 async function saveEdit(index, id) {
     const newEn = document.getElementById(`edit-en-${index}`).value.trim();
     const newFr = document.getElementById(`edit-fr-${index}`).value.trim();
@@ -193,7 +192,6 @@ async function saveEdit(index, id) {
     await loadWordsFromCloud();
 }
 
-// Ajoute un mot sur Supabase
 async function addWord() {
     const en = document.getElementById("newEnglish").value.trim();
     const fr = document.getElementById("newFrench").value.trim();
@@ -220,7 +218,6 @@ async function addWord() {
     await loadWordsFromCloud();
 }
 
-// Supprime un mot sur Supabase
 async function deleteWord(index, id) {
     if (!confirm("Supprimer ce mot ?")) {
         return;
@@ -310,11 +307,27 @@ function successCard() {
         successENFR.push(currentENFR.id);
         saveLocalProgress();
     }
-    nextENFR();
+    
+    // Si la carte est retournée, on cache la réponse pour éviter qu'elle clignote
+    if (isFlippedENFR) {
+        document.getElementById("card-enfr-text-back").textContent = "";
+        flipENFR();
+        setTimeout(nextENFR, 400); // 400ms pour attendre que la carte soit à plat avant le mot suivant
+    } else {
+        nextENFR();
+    }
 }
 
 function wrongCard() {
-    nextENFR();
+    if (!currentENFR) return;
+    
+    if (isFlippedENFR) {
+        document.getElementById("card-enfr-text-back").textContent = "";
+        flipENFR();
+        setTimeout(nextENFR, 400);
+    } else {
+        nextENFR();
+    }
 }
 
 function nextFREN() {
@@ -352,34 +365,36 @@ function flipFREN() {
     isFlippedFREN = !isFlippedFREN;
     document.getElementById("card-fren-inner").classList.toggle("is-flipped");
 }
-function successCard() {
-    if (!currentENFR) return;
 
-    if (!successENFR.includes(currentENFR.id)) {
-        successENFR.push(currentENFR.id);
+function successCardFR() {
+    if (!currentFREN) return;
+
+    if (!successFREN.includes(currentFREN.id)) {
+        successFREN.push(currentFREN.id);
         saveLocalProgress();
     }
     
-    // Si la carte était retournée, on la remet à l'endroit d'abord
-    if (isFlippedENFR) {
-        flipENFR();
-        // On attend 300ms (temps de l'animation CSS) avant de passer au mot suivant
-        setTimeout(nextENFR, 450);
+    if (isFlippedFREN) {
+        document.getElementById("card-fren-text-back").textContent = "";
+        flipFREN();
+        setTimeout(nextFREN, 450);
     } else {
-        nextENFR();
+        nextFREN();
     }
 }
 
-function wrongCard() {
-    if (!currentENFR) return;
-    
-    if (isFlippedENFR) {
-        flipENFR();
-        setTimeout(nextENFR, 450);
+function wrongCardFR() {
+    if (!currentFREN) return;
+
+    if (isFlippedFREN) {
+        document.getElementById("card-fren-text-back").textContent = "";
+        flipFREN();
+        setTimeout(nextFREN, 450);
     } else {
-        nextENFR();
+        nextFREN();
     }
 }
+
 function resetProgress() {
     successENFR = [];
     successFREN = [];

@@ -1,188 +1,33 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apprendre l'anglais</title>
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-}
-
-body{
-    background:linear-gradient(135deg,#4f46e5,#9333ea);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    color:white;
-}
-
-h1{
-    margin-bottom:30px;
-}
-
-.card{
-    width:320px;
-    height:220px;
-    perspective:1000px;
-    cursor:pointer;
-}
-
-.card-inner{
-    width:100%;
-    height:100%;
-    position:relative;
-    transition:transform 0.7s;
-    transform-style:preserve-3d;
-}
-
-.card.flipped .card-inner{
-    transform:rotateY(180deg);
-}
-
-.face{
-    position:absolute;
-    width:100%;
-    height:100%;
-    border-radius:20px;
-    background:white;
-    color:#222;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:2rem;
-    font-weight:bold;
-    backface-visibility:hidden;
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-
-.back{
-    transform:rotateY(180deg);
-    background:#f0fdf4;
-}
-
-.buttons{
-    margin-top:30px;
-    display:flex;
-    gap:15px;
-}
-
-button{
-    border:none;
-    padding:12px 24px;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:bold;
-}
-
-.next{
-    background:#22c55e;
-    color:white;
-}
-
-.shuffle{
-    background:#f59e0b;
-    color:white;
-}
-
-.counter{
-    margin-top:20px;
-    font-size:18px;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Flashcards Anglais</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    style.css
 </head>
-
 <body>
 
-<h1>📚 Flashcards Anglais</h1>
+    <h1>📚 Apprendre l'anglais</h1>
 
-<div class="card" id="card">
-    <div class="card-inner">
-        <div class="face front" id="english"></div>
-        <div class="face back" id="french"></div>
+    <div class="card" id="card">
+        <div class="card-inner">
+            <div class="face front" id="english"></div>
+            <div class="face back" id="french"></div>
+        </div>
     </div>
-</div>
 
-<div class="buttons">
-    <button class="next" onclick="nextWord()">Mot suivant</button>
-    <button class="shuffle" onclick="shuffleWords()">Mélanger</button>
-</div>
+    <div class="buttons">
+        <button class="next" onclick="nextWord()">Mot suivant</button>
+        <button class="shuffle" onclick="shuffleWords()">Mélanger</button>
+    </div>
 
-<div class="counter">
-    Carte <span id="current">1</span> / <span id="total"></span>
-</div>
+    <div class="counter">
+        Carte <span id="current"></span> / <span id="total"></span>
+    </div>
 
-<script>
-
-const words = [
-    {en:"Apple", fr:"Pomme"},
-    {en:"Dog", fr:"Chien"},
-    {en:"Cat", fr:"Chat"},
-    {en:"House", fr:"Maison"},
-    {en:"Book", fr:"Livre"},
-    {en:"School", fr:"École"},
-    {en:"Car", fr:"Voiture"},
-    {en:"Water", fr:"Eau"},
-    {en:"Food", fr:"Nourriture"},
-    {en:"Friend", fr:"Ami"},
-    {en:"Family", fr:"Famille"},
-    {en:"Sun", fr:"Soleil"},
-    {en:"Moon", fr:"Lune"},
-    {en:"Computer", fr:"Ordinateur"},
-    {en:"Teacher", fr:"Professeur"},
-    {en:"Window", fr:"Fenêtre"},
-    {en:"Door", fr:"Porte"},
-    {en:"Table", fr:"Table"},
-    {en:"Chair", fr:"Chaise"},
-    {en:"Phone", fr:"Téléphone"}
-];
-
-let index = 0;
-
-const english = document.getElementById("english");
-const french = document.getElementById("french");
-const card = document.getElementById("card");
-
-function displayWord() {
-    english.textContent = words[index].en;
-    french.textContent = words[index].fr;
-
-    document.getElementById("current").textContent = index + 1;
-    document.getElementById("total").textContent = words.length;
-
-    card.classList.remove("flipped");
-}
-
-displayWord();
-
-card.addEventListener("click", () => {
-    card.classList.toggle("flipped");
-});
-
-function nextWord() {
-    index++;
-
-    if(index >= words.length){
-        index = 0;
-    }
-
-    displayWord();
-}
-
-function shuffleWords() {
-    words.sort(() => Math.random() - 0.5);
-    index = 0;
-    displayWord();
-}
-
-</script>
+    script.js
 
 </body>
 </html>
+``

@@ -12,6 +12,7 @@ let isFlippedENFR = false;
 let isFlippedFREN = false;
 
 let sortDirection = 1;
+let editingIndex = null; 
 
 function save() {
     localStorage.setItem("customWords", JSON.stringify(ALL_WORDS));
@@ -29,6 +30,7 @@ function showPage(page) {
 
     localStorage.setItem("currentPage", page);
 
+    cancelEdit(); 
     refreshTable();
     
     if (page === 'enfr') nextENFR();
@@ -40,22 +42,75 @@ function refreshTable() {
     body.innerHTML = "";
 
     ALL_WORDS.forEach((word, index) => {
-        body.innerHTML += `
-        <tr>
-            <td>${word.en}</td>
-            <td>${word.fr}</td>
-            <td>${word.description || ""}</td>
-            <td>
-                <button class="delete-btn" onclick="deleteWord(${index})">
-                    Supprimer
-                </button>
-            </td>
-        </tr>
-        `;
+        if (editingIndex === index) {
+            body.innerHTML += `
+            <tr>
+                <td><input type="text" id="edit-en-${index}" class="table-input" value="${word.en}"></td>
+                <td><input type="text" id="edit-fr-${index}" class="table-input" value="${word.fr}"></td>
+                <td><input type="text" id="edit-desc-${index}" class="table-input" value="${word.description || ""}"></td>
+                <td>
+                    <button class="save-btn" onclick="saveEdit(${index})">Enregistrer</button>
+                    <button class="cancel-btn" onclick="cancelEdit()">Annuler</button>
+                </td>
+            </tr>
+            `;
+        } else {
+            body.innerHTML += `
+            <tr>
+                <td>${word.en}</td>
+                <td>${word.fr}</td>
+                <td>${word.description || ""}</td>
+                <td>
+                    <button class="edit-btn" onclick="startEdit(${index})">Modifier</button>
+                    <button class="delete-btn" onclick="deleteWord(${index})">Supprimer</button>
+                </td>
+            </tr>
+            `;
+        }
     });
 
     document.getElementById("totalWords").textContent = ALL_WORDS.length;
     document.getElementById("totalWordsHome").textContent = ALL_WORDS.length;
+}
+
+function startEdit(index) {
+    editingIndex = index;
+    refreshTable();
+}
+
+function cancelEdit() {
+    editingIndex = null;
+    refreshTable();
+}
+
+function saveEdit(index) {
+    const newEn = document.getElementById(`edit-en-${index}`).value.trim();
+    const newFr = document.getElementById(`edit-fr-${index}`).value.trim();
+    const newDesc = document.getElementById(`edit-desc-${index}`).value.trim();
+
+    if (!newEn || !newFr) {
+        alert("Les champs Anglais et Français ne peuvent pas être vides.");
+        return;
+    }
+
+    const oldEn = ALL_WORDS[index].en;
+    if (oldEn !== newEn && successENFR.includes(oldEn)) {
+        successENFR = successENFR.map(w => w === oldEn ? newEn : w);
+    }
+
+    const oldFr = ALL_WORDS[index].fr;
+    if (oldFr !== newFr && successFREN.includes(oldFr)) {
+        successFREN = successFREN.map(w => w === oldFr ? newFr : w);
+    }
+
+    ALL_WORDS[index] = { en: newEn, fr: newFr, description: newDesc };
+    
+    editingIndex = null;
+    save();
+    refreshTable();
+
+    nextENFR();
+    nextFREN();
 }
 
 function addWord() {
@@ -85,7 +140,14 @@ function deleteWord(index) {
         return;
     }
 
+    const wordToDelete = ALL_WORDS[index];
+    successENFR = successENFR.filter(w => w !== wordToDelete.en);
+    successFREN = successFREN.filter(w => w !== wordToDelete.fr);
+
     ALL_WORDS.splice(index, 1);
+    
+    if (editingIndex === index) editingIndex = null;
+    
     save();
     refreshTable();
 
@@ -94,6 +156,8 @@ function deleteWord(index) {
 }
 
 function sortTable(column) {
+    editingIndex = null;
+
     ALL_WORDS.sort((a, b) => {
         let x = (a[column] || "").toLowerCase();
         let y = (b[column] || "").toLowerCase();

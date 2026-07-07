@@ -9,6 +9,21 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js" defer></script>
+    
+    <style>
+        /* Petites règles CSS d'appoint pour espacer la zone des réussites */
+        .success-zone {
+            margin-top: 50px;
+            border-top: 2px dashed #cbd5e1;
+            padding-top: 25px;
+        }
+        .success-zone h3 {
+            font-size: 1.4rem;
+            color: #4d122a;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
@@ -30,7 +45,7 @@
             </p>
 
             <p>
-                Utilise les flashcards pour apprendre ton vocabulaire.
+                Niveau A1 à C1
             </p>
 
             <button class="commencer" onclick="showPage('enfr')">
@@ -69,7 +84,7 @@
     </section>
 
     <section id="enfr-page" class="hidden">
-        <h1>Anglais ➜ Français</h1>
+        <h1>Anglais vers Français</h1>
 
         <div class="stats">
             <div>À apprendre : <b id="left-enfr">0</b></div>
@@ -93,12 +108,28 @@
         </div>
 
         <button class="reset" onclick="resetProgress()">
-            Réinitialiser la progression
+            Réinitialiser toute la progression
         </button>
+
+        <div class="success-zone">
+            <h3>Mots réussis d'Anglais à Français</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Anglais</th>
+                            <th>Français</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="successTableBodyENFR"></tbody>
+                </table>
+            </div>
+        </div>
     </section>
 
     <section id="fren-page" class="hidden">
-        <h1>Français ➜ Anglais</h1>
+        <h1>Français vers Anglais</h1>
 
         <div class="stats">
             <div>À apprendre : <b id="left-fren">0</b></div>
@@ -122,8 +153,24 @@
         </div>
 
         <button class="reset" onclick="resetProgress()">
-            Réinitialiser la progression
+            Réinitialiser toute la progression
         </button>
+
+        <div class="success-zone">
+            <h3>Mots réussis de Français à Anglais</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Français</th>
+                            <th>Anglais</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="successTableBodyFREN"></tbody>
+                </table>
+            </div>
+        </div>
     </section>
 </main>
 

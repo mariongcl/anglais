@@ -1,10 +1,45 @@
+// Configuration de ta connexion Supabase
 const SUPABASE_URL = "https://xxblzfxzvclmuhnwoyvk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_pSkke6fICR5b0U2fAFF6Dw_N3ImOwYS";
+
+// Corrigé : on ne peut pas nommer le client "supabase" quand la librairie
+// globale s'appelle déjà "supabase". "const supabase = supabase.createClient(...)"
+// tente de lire la variable avant qu'elle soit initialisée -> ReferenceError
+// dès la première ligne exécutée, qui bloque tout le reste du script (donc
+// plus aucun bouton ne répond).
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// --- Accès sécurisé au localStorage (progression + page courante) ---
+// Si localStorage est bloqué (navigation privée, aperçu en iframe, etc.),
+// on bascule sur un repli en mémoire au lieu de planter tout le script.
+const memoryFallback = {};
+
+function storageGet(key) {
+    try {
+        return localStorage.getItem(key);
+    } catch (e) {
+        console.warn(`localStorage indisponible, repli en mémoire pour "${key}"`, e);
+        return memoryFallback[key] ?? null;
+    }
+}
+
+function storageSet(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch (e) {
+        console.warn(`localStorage indisponible, sauvegarde en mémoire uniquement pour "${key}"`, e);
+        memoryFallback[key] = value;
+    }
+}
+
 let ALL_WORDS = [];
-let successENFR = JSON.parse(localStorage.getItem("successENFR")) || [];
-let successFREN = JSON.parse(localStorage.getItem("successFREN")) || [];
+
+// Corrigé : la progression est maintenant indexée sur l'id stable du mot
+// (fourni par Supabase) plutôt que sur son texte anglais/français. Avant,
+// renommer un mot lui faisait perdre sa progression (ou la transférait
+// vers un autre mot ayant le même texte).
+let successENFR = JSON.parse(storageGet("successENFR")) || [];
+let successFREN = JSON.parse(storageGet("successFREN")) || [];
 
 let currentENFR = null;
 let currentFREN = null;
@@ -12,9 +47,11 @@ let currentFREN = null;
 let isFlippedENFR = false;
 let isFlippedFREN = false;
 
+let sortColumn = null;
 let sortDirection = 1;
-let editingIndex = null; 
+let editingIndex = null;
 
+// Charge l'ensemble des mots depuis la bdd Supabase
 async function loadWordsFromCloud() {
     const { data, error } = await supabaseClient
         .from('words')
@@ -23,20 +60,21 @@ async function loadWordsFromCloud() {
 
     if (error) {
         console.error("Erreur lors du chargement des mots:", error);
+        alert("Impossible de charger les mots depuis le serveur.");
         return;
     }
 
     ALL_WORDS = data || [];
     refreshTable();
-    
-    const activePage = localStorage.getItem("currentPage") || "home";
+
+    const activePage = storageGet("currentPage") || "home";
     if (activePage === 'enfr') nextENFR();
     if (activePage === 'fren') nextFREN();
 }
 
 function saveLocalProgress() {
-    localStorage.setItem("successENFR", JSON.stringify(successENFR));
-    localStorage.setItem("successFREN", JSON.stringify(successFREN));
+    storageSet("successENFR", JSON.stringify(successENFR));
+    storageSet("successFREN", JSON.stringify(successFREN));
 }
 
 function showPage(page) {
@@ -47,11 +85,11 @@ function showPage(page) {
 
     document.getElementById(page + "-page").classList.remove("hidden");
 
-    localStorage.setItem("currentPage", page);
+    storageSet("currentPage", page);
 
-    cancelEdit(); 
+    cancelEdit();
     refreshTable();
-    
+
     if (page === 'enfr') nextENFR();
     if (page === 'fren') nextFREN();
 }
@@ -60,36 +98,78 @@ function refreshTable() {
     const body = document.getElementById("tableBody");
     body.innerHTML = "";
 
+    // Corrigé : construction des lignes via le DOM plutôt que par
+    // concaténation de chaînes HTML. Avant, un mot/id/description contenant
+    // un guillemet, un tiret (cas des UUID Supabase) ou un caractère "<"
+    // pouvait casser le HTML généré ou les attributs onclick.
     ALL_WORDS.forEach((word, index) => {
+        const tr = document.createElement("tr");
+
         if (editingIndex === index) {
-            body.innerHTML += `
-            <tr>
-                <td><input type="text" id="edit-en-${index}" class="table-input" value="${word.en}"></td>
-                <td><input type="text" id="edit-fr-${index}" class="table-input" value="${word.fr}"></td>
-                <td><input type="text" id="edit-desc-${index}" class="table-input" value="${word.description || ""}"></td>
-                <td>
-                    <button class="save-btn" onclick="saveEdit(${index}, ${word.id})">Enregistrer</button>
-                    <button class="cancel-btn" onclick="cancelEdit()">Annuler</button>
-                </td>
-            </tr>
-            `;
+            tr.appendChild(makeEditableCell(`edit-en-${index}`, word.en));
+            tr.appendChild(makeEditableCell(`edit-fr-${index}`, word.fr));
+            tr.appendChild(makeEditableCell(`edit-desc-${index}`, word.description || ""));
+
+            const tdAction = document.createElement("td");
+
+            const saveBtn = document.createElement("button");
+            saveBtn.type = "button";
+            saveBtn.className = "save-btn";
+            saveBtn.textContent = "Enregistrer";
+            saveBtn.addEventListener("click", () => saveEdit(index, word.id));
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.type = "button";
+            cancelBtn.className = "cancel-btn";
+            cancelBtn.textContent = "Annuler";
+            cancelBtn.addEventListener("click", cancelEdit);
+
+            tdAction.append(saveBtn, cancelBtn);
+            tr.appendChild(tdAction);
         } else {
-            body.innerHTML += `
-            <tr>
-                <td>${word.en}</td>
-                <td>${word.fr}</td>
-                <td>${word.description || ""}</td>
-                <td>
-                    <button class="edit-btn" onclick="startEdit(${index})">Modifier</button>
-                    <button class="delete-btn" onclick="deleteWord(${index}, ${word.id})">Supprimer</button>
-                </td>
-            </tr>
-            `;
+            const tdEn = document.createElement("td");
+            tdEn.textContent = word.en;
+
+            const tdFr = document.createElement("td");
+            tdFr.textContent = word.fr;
+
+            const tdDesc = document.createElement("td");
+            tdDesc.textContent = word.description || "";
+
+            const tdAction = document.createElement("td");
+
+            const editBtn = document.createElement("button");
+            editBtn.type = "button";
+            editBtn.className = "edit-btn";
+            editBtn.textContent = "Modifier";
+            editBtn.addEventListener("click", () => startEdit(index));
+
+            const delBtn = document.createElement("button");
+            delBtn.type = "button";
+            delBtn.className = "delete-btn";
+            delBtn.textContent = "Supprimer";
+            delBtn.addEventListener("click", () => deleteWord(index, word.id));
+
+            tdAction.append(editBtn, delBtn);
+            tr.append(tdEn, tdFr, tdDesc, tdAction);
         }
+
+        body.appendChild(tr);
     });
 
     document.getElementById("totalWords").textContent = ALL_WORDS.length;
     document.getElementById("totalWordsHome").textContent = ALL_WORDS.length;
+}
+
+function makeEditableCell(id, value) {
+    const td = document.createElement("td");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = id;
+    input.className = "table-input";
+    input.value = value; // assignation via la propriété JS -> aucune injection HTML possible
+    td.appendChild(input);
+    return td;
 }
 
 function startEdit(index) {
@@ -102,6 +182,7 @@ function cancelEdit() {
     refreshTable();
 }
 
+// Modifie un mot sur Supabase
 async function saveEdit(index, id) {
     const newEn = document.getElementById(`edit-en-${index}`).value.trim();
     const newFr = document.getElementById(`edit-fr-${index}`).value.trim();
@@ -122,21 +203,14 @@ async function saveEdit(index, id) {
         return;
     }
 
-    const oldEn = ALL_WORDS[index].en;
-    if (oldEn !== newEn && successENFR.includes(oldEn)) {
-        successENFR = successENFR.map(w => w === oldEn ? newEn : w);
-    }
-
-    const oldFr = ALL_WORDS[index].fr;
-    if (oldFr !== newFr && successFREN.includes(oldFr)) {
-        successFREN = successFREN.map(w => w === oldFr ? newFr : w);
-    }
-
+    // Plus besoin de remapper successENFR/successFREN à la main ici :
+    // la progression suit l'id du mot, pas son texte, donc un renommage
+    // ne casse plus rien.
     editingIndex = null;
-    saveLocalProgress();
     await loadWordsFromCloud();
 }
 
+// Ajoute un mot sur Supabase
 async function addWord() {
     const en = document.getElementById("newEnglish").value.trim();
     const fr = document.getElementById("newFrench").value.trim();
@@ -163,6 +237,7 @@ async function addWord() {
     await loadWordsFromCloud();
 }
 
+// Supprime un mot sur Supabase
 async function deleteWord(index, id) {
     if (!confirm("Supprimer ce mot ?")) {
         return;
@@ -178,18 +253,30 @@ async function deleteWord(index, id) {
         return;
     }
 
-    const wordToDelete = ALL_WORDS[index];
-    successENFR = successENFR.filter(w => w !== wordToDelete.en);
-    successFREN = successFREN.filter(w => w !== wordToDelete.fr);
+    // Nettoyage : on retire aussi l'id des listes de progression pour
+    // éviter qu'il reste orphelin indéfiniment dans le localStorage.
+    successENFR = successENFR.filter(x => x !== id);
+    successFREN = successFREN.filter(x => x !== id);
 
     if (editingIndex === index) editingIndex = null;
-    
+
     saveLocalProgress();
     await loadWordsFromCloud();
 }
 
 function sortTable(column) {
     editingIndex = null;
+
+    // Corrigé : on n'inverse le sens du tri que si on reclique sur la
+    // même colonne. Avant, la direction restait partagée entre toutes les
+    // colonnes, ce qui donnait un tri décroissant surprenant au premier
+    // clic sur une nouvelle colonne.
+    if (sortColumn === column) {
+        sortDirection *= -1;
+    } else {
+        sortColumn = column;
+        sortDirection = 1;
+    }
 
     ALL_WORDS.sort((a, b) => {
         let x = (a[column] || "").toLowerCase();
@@ -200,7 +287,6 @@ function sortTable(column) {
         return 0;
     });
 
-    sortDirection *= -1;
     refreshTable();
 }
 
@@ -217,7 +303,7 @@ function nextENFR() {
         return;
     }
 
-    const remaining = ALL_WORDS.filter(w => !successENFR.includes(w.en));
+    const remaining = ALL_WORDS.filter(w => !successENFR.includes(w.id));
 
     document.getElementById("left-enfr").textContent = remaining.length;
     document.getElementById("right-enfr").textContent = successENFR.length;
@@ -234,7 +320,6 @@ function nextENFR() {
     document.getElementById("card-enfr-text-back").textContent = currentENFR.fr;
 }
 
-// Les fonctions flipENFR, successCard, wrongCard, nextFREN, flipFREN, successCardFR, wrongCardFR et resetProgress restent strictement identiques...
 function flipENFR() {
     if (!currentENFR) return;
     isFlippedENFR = !isFlippedENFR;
@@ -243,18 +328,22 @@ function flipENFR() {
 
 function successCard() {
     if (!currentENFR) return;
-    if (!successENFR.includes(currentENFR.en)) {
-        successENFR.push(currentENFR.en);
+
+    if (!successENFR.includes(currentENFR.id)) {
+        successENFR.push(currentENFR.id);
         saveLocalProgress();
     }
     nextENFR();
 }
 
-function wrongCard() { nextENFR(); }
+function wrongCard() {
+    nextENFR();
+}
 
 function nextFREN() {
     document.getElementById("card-fren-inner").classList.remove("is-flipped");
     isFlippedFREN = false;
+
     if (ALL_WORDS.length === 0) {
         document.getElementById("left-fren").textContent = "0";
         document.getElementById("right-fren").textContent = "0";
@@ -263,15 +352,19 @@ function nextFREN() {
         currentFREN = null;
         return;
     }
-    const remaining = ALL_WORDS.filter(w => !successFREN.includes(w.fr));
+
+    const remaining = ALL_WORDS.filter(w => !successFREN.includes(w.id));
+
     document.getElementById("left-fren").textContent = remaining.length;
     document.getElementById("right-fren").textContent = successFREN.length;
+
     if (remaining.length === 0) {
         document.getElementById("card-fren-text-front").textContent = "🎉 Terminé !";
         document.getElementById("card-fren-text-back").textContent = "Bravo";
         currentFREN = null;
         return;
     }
+
     currentFREN = remaining[Math.floor(Math.random() * remaining.length)];
     document.getElementById("card-fren-text-front").textContent = currentFREN.fr;
     document.getElementById("card-fren-text-back").textContent = currentFREN.en;
@@ -285,24 +378,29 @@ function flipFREN() {
 
 function successCardFR() {
     if (!currentFREN) return;
-    if (!successFREN.includes(currentFREN.fr)) {
-        successFREN.push(currentFREN.fr);
+
+    if (!successFREN.includes(currentFREN.id)) {
+        successFREN.push(currentFREN.id);
         saveLocalProgress();
     }
     nextFREN();
 }
 
-function wrongCardFR() { nextFREN(); }
+function wrongCardFR() {
+    nextFREN();
+}
 
 function resetProgress() {
     successENFR = [];
     successFREN = [];
     saveLocalProgress();
+
     nextENFR();
     nextFREN();
     alert("Progression réinitialisée");
 }
 
+// Lancement au démarrage de la page
 loadWordsFromCloud();
-const lastPage = localStorage.getItem("currentPage") || "home";
+const lastPage = storageGet("currentPage") || "home";
 showPage(lastPage);

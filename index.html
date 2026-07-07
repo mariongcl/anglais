@@ -1,33 +1,133 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
-    <title>Flashcards Anglais</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Trainer</title>
+
     style.css
+
+    words.js
+    " defer></script>
 </head>
+
 <body>
 
-    <h1>📚 Apprendre l'anglais</h1>
+<nav>
+    <button onclick="showPage('home')">🏠 Accueil</button>
+    <button onclick="showPage('list')">📚 Mots</button>
+    <button onclick="showPage('enfr')">🇬🇧 ➜ 🇫🇷</button>
+    <button onclick="showPage('fren')">🇫🇷 ➜ 🇬🇧</button>
+</nav>
 
-    <div class="card" id="card">
-        <div class="card-inner">
-            <div class="face front" id="english"></div>
-            <div class="face back" id="french"></div>
-        </div>
+<section id="home-page">
+    <h1>Bienvenue sur English Trainer</h1>
+
+    <div class="home-box">
+        <p>
+            Nombre total de mots :
+            <b id="totalWordsHome">0</b>
+        </p>
+
+        <p>
+            Utilise les flashcards pour apprendre ton vocabulaire.
+        </p>
+
+        <button onclick="showPage('enfr')">
+            Commencer
+        </button>
+    </div>
+</section>
+
+<section id="list-page" class="hidden">
+
+    <h1>Tous les mots</h1>
+
+    <p>
+        Total :
+        <b id="totalWords">0</b>
+        mots
+    </p>
+
+    <div class="add-word">
+
+        <input id="newEnglish" placeholder="Mot anglais">
+
+        <input id="newFrench" placeholder="Mot français">
+
+        <input id="newDescription" placeholder="Description">
+
+        <button onclick="addWord()">
+            ➕ Ajouter
+        </button>
+
     </div>
 
-    <div class="buttons">
-        <button class="next" onclick="nextWord()">Mot suivant</button>
-        <button class="shuffle" onclick="shuffleWords()">Mélanger</button>
+    <table>
+
+        <thead>
+            <tr>
+                <th onclick="sortTable('en')">Anglais ↕</th>
+                <th onclick="sortTable('fr')">Français ↕</th>
+                <th onclick="sortTable('description')">Description ↕</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="tableBody"></tbody>
+
+    </table>
+
+</section>
+
+<section id="enfr-page" class="hidden">
+
+    <h1>Anglais ➜ Français</h1>
+
+    <div class="stats">
+        <div>À apprendre : <b id="left-enfr"></b></div>
+        <div>Réussi : <b id="right-enfr"></b></div>
     </div>
 
-    <div class="counter">
-        Carte <span id="current"></span> / <span id="total"></span>
+    <div class="card" onclick="flipENFR()">
+        <div id="card-enfr-text"></div>
     </div>
 
-    script.js
+    <div class="actions">
+        <button class="bad" onclick="wrongCard()">❌ Faux</button>
+        <button class="good" onclick="successCard()">✅ Réussi</button>
+    </div>
+
+    <button class="reset" onclick="resetProgress()">
+        🔄 Réinitialiser
+    </button>
+
+</section>
+
+<section id="fren-page" class="hidden">
+
+    <h1>Français ➜ Anglais</h1>
+
+    <div class="stats">
+        <div>À apprendre : <b id="left-fren"></b></div>
+        <div>Réussi : <b id="right-fren"></b></div>
+    </div>
+
+    <div class="card" onclick="flipFREN()">
+        <div id="card-fren-text"></div>
+    </div>
+
+    <div class="actions">
+        <button class="bad" onclick="wrongCardFR()">❌ Faux</button>
+        <button class="good" onclick="successCardFR()">✅ Réussi</button>
+    </div>
+
+    <button class="reset" onclick="resetProgress()">
+         Réinitialiser
+    </button>
+
+</section>
 
 </body>
 </html>
-``

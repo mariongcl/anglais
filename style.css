@@ -8,16 +8,21 @@ nav{
     display:flex;
     gap:10px;
     padding:15px;
-    background:#1e293b;
+    background:#4d122a;
+}
+nav button {
+    background: #752243; /* Rose foncé pour les boutons de navigation */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    
 }
 
-nav button{
-    background:#334155;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:8px;
-    cursor:pointer;
+nav button:hover {
+    background: #db2777; /* Rose vif au survol */
 }
 
 .hidden{
@@ -47,15 +52,19 @@ section{
 }
 
 table{
-    width:100%;
+    width:50%;
     border-collapse:collapse;
     background:white;
 }
 
 th{
-    background:#2563eb;
+    background:#B39691;
     color:white;
     cursor:pointer;
+}
+
+th:hover {
+    background: #be185d; /* Rose plus foncé au survol */
 }
 
 th,td{
@@ -63,27 +72,60 @@ th,td{
     border:1px solid #ddd;
 }
 
-.card{
-    width:450px;
-    max-width:90%;
-    height:250px;
-    margin:30px auto;
-    background:white;
-    border-radius:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:2rem;
-    font-weight:bold;
-    cursor:pointer;
-    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+/* --- Système de Carte 3D Animée --- */
+.card-container {
+    perspective: 1000px;
+    width: 450px;
+    max-width: 90%;
+    height: 250px;
+    margin: 30px auto;
+    cursor: pointer;
 }
 
-.card:hover{
-    transform:scale(1.02);
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-radius: 20px;
 }
 
-.stats{
+.card-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    border-radius: 20px;
+    background: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+    color: #2563eb;
+}
+
+.card-container:hover .card-inner:not(.is-flipped) {
+    transform: scale(1.02);
+}
+
+/* ---------------------------------- */
+
+.stats {
     display:flex;
     gap:30px;
 }
@@ -101,8 +143,73 @@ button{
     cursor:pointer;
 }
 
+/* Style de base propre au bouton commencer */
+.commencer {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+/* Variables et positionnement */
+.commencer {
+    --primary-color: #111;
+    --hovered-color: #db2777; /* Modifié en rose pour ton thème */
+    position: relative;
+    display: flex;
+    font-weight: 600;
+    font-size: 20px;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Style du texte interne */
+.commencer p {
+    margin: 0;
+    position: relative;
+    font-size: 20px;
+    color: var(--primary-color);
+}
+
+/* Barre de soulignement animée */
+.commencer::after {
+    position: absolute;
+    content: "";
+    width: 0;
+    left: 0;
+    bottom: -7px;
+    background: var(--hovered-color);
+    height: 2px;
+    transition: 0.3s ease-out;
+}
+
+/* Effet de texte qui se colore par-dessus */
+.commencer p::before {
+    position: absolute;
+    content: "Subscribe";
+    width: 0%;
+    inset: 0;
+    color: var(--hovered-color);
+    overflow: hidden;
+    transition: 0.3s ease-out;
+}
+
+/* Déclenchement des animations au survol (hover) */
+.commencer:hover::after {
+    width: 100%;
+}
+
+.commencer:hover p::before {
+    width: 100%;
+}
+
 .good{
     background:#22c55e;
+    color:white;
+}
+.good:hover{
+    background:#1AA34C;
     color:white;
 }
 
@@ -110,6 +217,14 @@ button{
     background:#ef4444;
     color:white;
 }
+.bad:hover{
+    background:#D13030;
+    color:white;
+}
+.ajouter:hover{
+ background:#AD9E9E;
+}
+
 
 .reset{
     display:block;
@@ -121,17 +236,54 @@ button{
 .delete-btn{
     background:#dc2626;
     color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:4px;
+    cursor:pointer;
 }
 
 @media(max-width:600px){
-
     nav{
         flex-wrap:wrap;
     }
 
-    .card{
-        height:180px;
-        font-size:1.5rem;
+    .card-container {
+        height: 180px;
     }
 
+    .card-front, .card-back {
+        font-size: 1.5rem;
+    }
+}
+
+/**************************************************/
+h1 {
+    font-size: 2.2rem;
+    color: #0f172a; /* Bleu-noir très moderne */
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+h1 {
+    font-size: 2.2rem;
+    color: #1e1b4b; /* Un bleu-noir très sombre qui fait ressortir le rose */
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+h1::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, #db2777, #f472b6 );
+    border-radius: 2px;
 }

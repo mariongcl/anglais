@@ -1,7 +1,6 @@
-// Configuration de ta connexion Supabase
 const SUPABASE_URL = "https://xxblzfxzvclmuhnwoyvk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_pSkke6fICR5b0U2fAFF6Dw_N3ImOwYS";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let ALL_WORDS = [];
 let successENFR = JSON.parse(localStorage.getItem("successENFR")) || [];
@@ -16,9 +15,8 @@ let isFlippedFREN = false;
 let sortDirection = 1;
 let editingIndex = null; 
 
-// Charge l'ensemble des mots depuis la bdd Supabase
 async function loadWordsFromCloud() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('words')
         .select('*')
         .order('created_at', { ascending: true });
@@ -31,7 +29,6 @@ async function loadWordsFromCloud() {
     ALL_WORDS = data || [];
     refreshTable();
     
-    // Rafraîchit l'affichage des cartes sur la page active
     const activePage = localStorage.getItem("currentPage") || "home";
     if (activePage === 'enfr') nextENFR();
     if (activePage === 'fren') nextFREN();
@@ -105,7 +102,6 @@ function cancelEdit() {
     refreshTable();
 }
 
-// Modifie un mot sur Supabase
 async function saveEdit(index, id) {
     const newEn = document.getElementById(`edit-en-${index}`).value.trim();
     const newFr = document.getElementById(`edit-fr-${index}`).value.trim();
@@ -116,7 +112,7 @@ async function saveEdit(index, id) {
         return;
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('words')
         .update({ en: newEn, fr: newFr, description: newDesc })
         .eq('id', id);
@@ -141,7 +137,6 @@ async function saveEdit(index, id) {
     await loadWordsFromCloud();
 }
 
-// Ajoute un mot sur Supabase
 async function addWord() {
     const en = document.getElementById("newEnglish").value.trim();
     const fr = document.getElementById("newFrench").value.trim();
@@ -152,7 +147,7 @@ async function addWord() {
         return;
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('words')
         .insert([{ en, fr, description }]);
 
@@ -168,13 +163,12 @@ async function addWord() {
     await loadWordsFromCloud();
 }
 
-// Supprime un mot sur Supabase
 async function deleteWord(index, id) {
     if (!confirm("Supprimer ce mot ?")) {
         return;
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('words')
         .delete()
         .eq('id', id);
@@ -240,6 +234,7 @@ function nextENFR() {
     document.getElementById("card-enfr-text-back").textContent = currentENFR.fr;
 }
 
+// Les fonctions flipENFR, successCard, wrongCard, nextFREN, flipFREN, successCardFR, wrongCardFR et resetProgress restent strictement identiques...
 function flipENFR() {
     if (!currentENFR) return;
     isFlippedENFR = !isFlippedENFR;
@@ -248,7 +243,6 @@ function flipENFR() {
 
 function successCard() {
     if (!currentENFR) return;
-
     if (!successENFR.includes(currentENFR.en)) {
         successENFR.push(currentENFR.en);
         saveLocalProgress();
@@ -256,14 +250,11 @@ function successCard() {
     nextENFR();
 }
 
-function wrongCard() {
-    nextENFR();
-}
+function wrongCard() { nextENFR(); }
 
 function nextFREN() {
     document.getElementById("card-fren-inner").classList.remove("is-flipped");
     isFlippedFREN = false;
-
     if (ALL_WORDS.length === 0) {
         document.getElementById("left-fren").textContent = "0";
         document.getElementById("right-fren").textContent = "0";
@@ -272,19 +263,15 @@ function nextFREN() {
         currentFREN = null;
         return;
     }
-
     const remaining = ALL_WORDS.filter(w => !successFREN.includes(w.fr));
-
     document.getElementById("left-fren").textContent = remaining.length;
     document.getElementById("right-fren").textContent = successFREN.length;
-
     if (remaining.length === 0) {
         document.getElementById("card-fren-text-front").textContent = "🎉 Terminé !";
         document.getElementById("card-fren-text-back").textContent = "Bravo";
         currentFREN = null;
         return;
     }
-
     currentFREN = remaining[Math.floor(Math.random() * remaining.length)];
     document.getElementById("card-fren-text-front").textContent = currentFREN.fr;
     document.getElementById("card-fren-text-back").textContent = currentFREN.en;
@@ -298,7 +285,6 @@ function flipFREN() {
 
 function successCardFR() {
     if (!currentFREN) return;
-
     if (!successFREN.includes(currentFREN.fr)) {
         successFREN.push(currentFREN.fr);
         saveLocalProgress();
@@ -306,21 +292,17 @@ function successCardFR() {
     nextFREN();
 }
 
-function wrongCardFR() {
-    nextFREN();
-}
+function wrongCardFR() { nextFREN(); }
 
 function resetProgress() {
     successENFR = [];
     successFREN = [];
     saveLocalProgress();
-
     nextENFR();
     nextFREN();
     alert("Progression réinitialisée");
 }
 
-// Lancement au démarrage de la page
 loadWordsFromCloud();
 const lastPage = localStorage.getItem("currentPage") || "home";
 showPage(lastPage);

@@ -1,7 +1,9 @@
-let ALL_WORDS = localStorage.getItem("customWords") 
-    ? JSON.parse(localStorage.getItem("customWords")) 
-    : [];
+// Configuration de ta connexion Supabase
+const SUPABASE_URL = "https://xxblzfxzvclmuhnwoyvk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_pSkke6fICR5b0U2fAFF6Dw_N3ImOwYS";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let ALL_WORDS = [];
 let successENFR = JSON.parse(localStorage.getItem("successENFR")) || [];
 let successFREN = JSON.parse(localStorage.getItem("successFREN")) || [];
 
@@ -14,8 +16,28 @@ let isFlippedFREN = false;
 let sortDirection = 1;
 let editingIndex = null; 
 
-function save() {
-    localStorage.setItem("customWords", JSON.stringify(ALL_WORDS));
+// Charge l'ensemble des mots depuis la bdd Supabase
+async function loadWordsFromCloud() {
+    const { data, error } = await supabase
+        .from('words')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error("Erreur lors du chargement des mots:", error);
+        return;
+    }
+
+    ALL_WORDS = data || [];
+    refreshTable();
+    
+    // Rafraîchit l'affichage des cartes sur la page active
+    const activePage = localStorage.getItem("currentPage") || "home";
+    if (activePage === 'enfr') nextENFR();
+    if (activePage === 'fren') nextFREN();
+}
+
+function saveLocalProgress() {
     localStorage.setItem("successENFR", JSON.stringify(successENFR));
     localStorage.setItem("successFREN", JSON.stringify(successFREN));
 }
@@ -49,7 +71,7 @@ function refreshTable() {
                 <td><input type="text" id="edit-fr-${index}" class="table-input" value="${word.fr}"></td>
                 <td><input type="text" id="edit-desc-${index}" class="table-input" value="${word.description || ""}"></td>
                 <td>
-                    <button class="save-btn" onclick="saveEdit(${index})">Enregistrer</button>
+                    <button class="save-btn" onclick="saveEdit(${index}, ${word.id})">Enregistrer</button>
                     <button class="cancel-btn" onclick="cancelEdit()">Annuler</button>
                 </td>
             </tr>
@@ -62,7 +84,7 @@ function refreshTable() {
                 <td>${word.description || ""}</td>
                 <td>
                     <button class="edit-btn" onclick="startEdit(${index})">Modifier</button>
-                    <button class="delete-btn" onclick="deleteWord(${index})">Supprimer</button>
+                    <button class="delete-btn" onclick="deleteWord(${index}, ${word.id})">Supprimer</button>
                 </td>
             </tr>
             `;
@@ -83,13 +105,24 @@ function cancelEdit() {
     refreshTable();
 }
 
-function saveEdit(index) {
+// Modifie un mot sur Supabase
+async function saveEdit(index, id) {
     const newEn = document.getElementById(`edit-en-${index}`).value.trim();
     const newFr = document.getElementById(`edit-fr-${index}`).value.trim();
     const newDesc = document.getElementById(`edit-desc-${index}`).value.trim();
 
     if (!newEn || !newFr) {
         alert("Les champs Anglais et Français ne peuvent pas être vides.");
+        return;
+    }
+
+    const { error } = await supabase
+        .from('words')
+        .update({ en: newEn, fr: newFr, description: newDesc })
+        .eq('id', id);
+
+    if (error) {
+        alert("Erreur lors de la modification");
         return;
     }
 
@@ -103,17 +136,13 @@ function saveEdit(index) {
         successFREN = successFREN.map(w => w === oldFr ? newFr : w);
     }
 
-    ALL_WORDS[index] = { en: newEn, fr: newFr, description: newDesc };
-    
     editingIndex = null;
-    save();
-    refreshTable();
-
-    nextENFR();
-    nextFREN();
+    saveLocalProgress();
+    await loadWordsFromCloud();
 }
 
-function addWord() {
+// Ajoute un mot sur Supabase
+async function addWord() {
     const en = document.getElementById("newEnglish").value.trim();
     const fr = document.getElementById("newFrench").value.trim();
     const description = document.getElementById("newDescription").value.trim();
@@ -123,20 +152,35 @@ function addWord() {
         return;
     }
 
-    ALL_WORDS.push({ en, fr, description });
-    save();
-    refreshTable();
+    const { error } = await supabase
+        .from('words')
+        .insert([{ en, fr, description }]);
+
+    if (error) {
+        alert("Erreur lors de l'ajout du mot sur le serveur.");
+        return;
+    }
 
     document.getElementById("newEnglish").value = "";
     document.getElementById("newFrench").value = "";
     document.getElementById("newDescription").value = "";
 
-    nextENFR();
-    nextFREN();
+    await loadWordsFromCloud();
 }
 
-function deleteWord(index) {
+// Supprime un mot sur Supabase
+async function deleteWord(index, id) {
     if (!confirm("Supprimer ce mot ?")) {
+        return;
+    }
+
+    const { error } = await supabase
+        .from('words')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert("Erreur lors de la suppression.");
         return;
     }
 
@@ -144,15 +188,10 @@ function deleteWord(index) {
     successENFR = successENFR.filter(w => w !== wordToDelete.en);
     successFREN = successFREN.filter(w => w !== wordToDelete.fr);
 
-    ALL_WORDS.splice(index, 1);
-    
     if (editingIndex === index) editingIndex = null;
     
-    save();
-    refreshTable();
-
-    nextENFR();
-    nextFREN();
+    saveLocalProgress();
+    await loadWordsFromCloud();
 }
 
 function sortTable(column) {
@@ -212,7 +251,7 @@ function successCard() {
 
     if (!successENFR.includes(currentENFR.en)) {
         successENFR.push(currentENFR.en);
-        save();
+        saveLocalProgress();
     }
     nextENFR();
 }
@@ -262,7 +301,7 @@ function successCardFR() {
 
     if (!successFREN.includes(currentFREN.fr)) {
         successFREN.push(currentFREN.fr);
-        save();
+        saveLocalProgress();
     }
     nextFREN();
 }
@@ -274,13 +313,14 @@ function wrongCardFR() {
 function resetProgress() {
     successENFR = [];
     successFREN = [];
-    save();
+    saveLocalProgress();
 
     nextENFR();
     nextFREN();
     alert("Progression réinitialisée");
 }
 
-refreshTable();
+// Lancement au démarrage de la page
+loadWordsFromCloud();
 const lastPage = localStorage.getItem("currentPage") || "home";
 showPage(lastPage);

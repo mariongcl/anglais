@@ -1,86 +1,137 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-}
-
 body{
-    background:linear-gradient(135deg,#4f46e5,#9333ea);
-    min-height:100vh;
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f6f9;
+}
+
+nav{
     display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
+    gap:10px;
+    padding:15px;
+    background:#1e293b;
+}
+
+nav button{
+    background:#334155;
     color:white;
-}
-
-h1{
-    margin-bottom:30px;
-}
-
-.card{
-    width:320px;
-    height:220px;
-    perspective:1000px;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
     cursor:pointer;
 }
 
-.card-inner{
-    width:100%;
-    height:100%;
-    position:relative;
-    transition:transform .7s;
-    transform-style:preserve-3d;
+.hidden{
+    display:none;
 }
 
-.card.flipped .card-inner{
-    transform:rotateY(180deg);
+section{
+    padding:25px;
 }
 
-.face{
-    position:absolute;
-    width:100%;
-    height:100%;
+.home-box{
     background:white;
-    color:#222;
+    padding:30px;
+    border-radius:12px;
+    max-width:600px;
+}
+
+.add-word{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.add-word input{
+    padding:10px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+}
+
+th,td{
+    padding:12px;
+    border:1px solid #ddd;
+}
+
+.card{
+    width:450px;
+    max-width:90%;
+    height:250px;
+    margin:30px auto;
+    background:white;
     border-radius:20px;
     display:flex;
     justify-content:center;
     align-items:center;
     font-size:2rem;
     font-weight:bold;
-    backface-visibility:hidden;
+    cursor:pointer;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
-.back{
-    transform:rotateY(180deg);
-    background:#f0fdf4;
+.card:hover{
+    transform:scale(1.02);
 }
 
-.buttons{
-    margin-top:25px;
+.stats{
+    display:flex;
+    gap:30px;
+}
+
+.actions{
+    display:flex;
+    justify-content:center;
+    gap:15px;
 }
 
 button{
-    padding:12px 20px;
     border:none;
-    border-radius:10px;
-    margin:0 5px;
+    padding:12px 20px;
+    border-radius:8px;
     cursor:pointer;
-    font-weight:bold;
 }
 
-.next{
+.good{
     background:#22c55e;
     color:white;
 }
 
-.shuffle{
-    background:#f59e0b;
+.bad{
+    background:#ef4444;
     color:white;
 }
 
-.counter{
-    margin-top:20px;
+.reset{
+    display:block;
+    margin:25px auto;
+    background:#64748b;
+    color:white;
+}
+
+.delete-btn{
+    background:#dc2626;
+    color:white;
+}
+
+@media(max-width:600px){
+
+    nav{
+        flex-wrap:wrap;
+    }
+
+    .card{
+        height:180px;
+        font-size:1.5rem;
+    }
+
 }

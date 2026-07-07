@@ -56,6 +56,7 @@ async function loadWordsFromCloud() {
 
     ALL_WORDS = data || [];
     refreshTable();
+    refreshSuccessTables();
 
     const activePage = storageGet("currentPage") || "home";
     if (activePage === 'enfr') nextENFR();
@@ -65,6 +66,7 @@ async function loadWordsFromCloud() {
 function saveLocalProgress() {
     storageSet("successENFR", JSON.stringify(successENFR));
     storageSet("successFREN", JSON.stringify(successFREN));
+    refreshSuccessTables();
 }
 
 function showPage(page) {
@@ -79,6 +81,7 @@ function showPage(page) {
 
     cancelEdit();
     refreshTable();
+    refreshSuccessTables();
 
     if (page === 'enfr') nextENFR();
     if (page === 'fren') nextFREN();
@@ -145,6 +148,59 @@ function refreshTable() {
 
     document.getElementById("totalWords").textContent = ALL_WORDS.length;
     document.getElementById("totalWordsHome").textContent = ALL_WORDS.length;
+}
+
+// Génère les deux tableaux des mots réussis sous les flashcards (avec l'action Supprimer de la BDD)
+function refreshSuccessTables() {
+    const bodyENFR = document.getElementById("successTableBodyENFR");
+    const bodyFREN = document.getElementById("successTableBodyFREN");
+    
+    if (bodyENFR) bodyENFR.innerHTML = "";
+    if (bodyFREN) bodyFREN.innerHTML = "";
+
+    ALL_WORDS.forEach((word, index) => {
+        // Remplissage tableau Anglais -> Français
+        if (successENFR.includes(word.id) && bodyENFR) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${word.en}</td>
+                <td>${word.fr}</td>
+                <td>
+                    <button class="cancel-btn" style="padding: 6px 12px; font-size: 0.85rem; margin-right: 5px;" onclick="removeSuccessENFR(${word.id})">Réapprendre</button>
+                    <button class="delete-btn" style="padding: 6px 12px; font-size: 0.85rem;" onclick="deleteWord(${index}, ${word.id})">Supprimer BDD</button>
+                </td>
+            `;
+            bodyENFR.appendChild(tr);
+        }
+
+        // Remplissage tableau Français -> Anglais
+        if (successFREN.includes(word.id) && bodyFREN) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${word.fr}</td>
+                <td>${word.en}</td>
+                <td>
+                    <button class="cancel-btn" style="padding: 6px 12px; font-size: 0.85rem; margin-right: 5px;" onclick="removeSuccessFREN(${word.id})">Réapprendre</button>
+                    <button class="delete-btn" style="padding: 6px 12px; font-size: 0.85rem;" onclick="deleteWord(${index}, ${word.id})">Supprimer BDD</button>
+                </td>
+            `;
+            bodyFREN.appendChild(tr);
+        }
+    });
+}
+
+// Supprime un mot spécifique des réussites EN->FR
+function removeSuccessENFR(id) {
+    successENFR = successENFR.filter(x => x !== id);
+    saveLocalProgress();
+    nextENFR();
+}
+
+// Supprime un mot spécifique des réussites FR->EN
+function removeSuccessFREN(id) {
+    successFREN = successFREN.filter(x => x !== id);
+    saveLocalProgress();
+    nextFREN();
 }
 
 function makeEditableCell(id, value) {
@@ -219,7 +275,7 @@ async function addWord() {
 }
 
 async function deleteWord(index, id) {
-    if (!confirm("Supprimer ce mot ?")) {
+    if (!confirm("Supprimer définitivement ce mot de la base de données ?")) {
         return;
     }
 
@@ -308,11 +364,9 @@ function successCard() {
         saveLocalProgress();
     }
     
-    // Si la carte est retournée, on cache la réponse pour éviter qu'elle clignote
     if (isFlippedENFR) {
-        document.getElementById("card-enfr-text-back").textContent = "";
         flipENFR();
-        setTimeout(nextENFR, 400); // 400ms pour attendre que la carte soit à plat avant le mot suivant
+        setTimeout(nextENFR, 400); 
     } else {
         nextENFR();
     }
@@ -322,7 +376,6 @@ function wrongCard() {
     if (!currentENFR) return;
     
     if (isFlippedENFR) {
-        document.getElementById("card-enfr-text-back").textContent = "";
         flipENFR();
         setTimeout(nextENFR, 400);
     } else {
@@ -375,7 +428,6 @@ function successCardFR() {
     }
     
     if (isFlippedFREN) {
-        document.getElementById("card-fren-text-back").textContent = "";
         flipFREN();
         setTimeout(nextFREN, 450);
     } else {
@@ -387,7 +439,6 @@ function wrongCardFR() {
     if (!currentFREN) return;
 
     if (isFlippedFREN) {
-        document.getElementById("card-fren-text-back").textContent = "";
         flipFREN();
         setTimeout(nextFREN, 450);
     } else {

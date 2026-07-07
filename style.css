@@ -1,28 +1,46 @@
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#f4f6f9;
+/* --- Styles Généraux --- */
+*{
+    box-sizing: border-box;
 }
 
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    color: #1e293b;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* --- Navigation Responsive --- */
 nav{
     display:flex;
     gap:10px;
     padding:15px;
     background:#4d122a;
+    justify-content: center;
 }
+
 nav button {
-    background: #752243; /* Rose foncé pour les boutons de navigation */
+    background: #752243;
     color: white;
     border: none;
     padding: 12px 20px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s;
-    
+    transition: background 0.2s, transform 0.1s;
+    font-weight: 500;
+    flex: 1;
+    max-width: 200px;
+    text-align: center;
 }
 
 nav button:hover {
-    background: #db2777; /* Rose vif au survol */
+    background: #db2777;
 }
 
 .hidden{
@@ -30,54 +48,104 @@ nav button:hover {
 }
 
 section{
-    padding:25px;
+    padding: 25px 15px;
 }
 
+/* --- Accueil --- */
 .home-box{
     background:white;
     padding:30px;
     border-radius:12px;
     max-width:600px;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
 }
 
+/* --- Formulaire d'ajout --- */
 .add-word{
     display:flex;
     gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
+    margin-bottom:25px;
+    width: 100%;
 }
 
 .add-word input{
-    padding:10px;
+    padding:12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    flex: 2;
+    min-width: 150px;
+    font-size: 1rem;
+}
+
+.add-word input#newDescription {
+    flex: 3;
+}
+
+.ajouter {
+    background: #752243;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    flex: 1;
+    min-width: 120px;
+    transition: background 0.2s;
+}
+
+.ajouter:hover{
+    background:#be185d;
+}
+
+/* --- Tableau & Mode Édition Mobile-Friendly --- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
 }
 
 table{
-    width:50%;
+    width: 100%;
     border-collapse:collapse;
     background:white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
 }
 
 th{
     background:#B39691;
     color:white;
     cursor:pointer;
+    text-align: left;
+    user-select: none;
 }
 
 th:hover {
-    background: #be185d; /* Rose plus foncé au survol */
+    background: #be185d;
 }
 
 th,td{
-    padding:12px;
-    border:1px solid #ddd;
+    padding:14px;
+    border-bottom:1px solid #e2e8f0;
+}
+
+.table-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.95rem;
 }
 
 /* --- Système de Carte 3D Animée --- */
 .card-container {
     perspective: 1000px;
-    width: 450px;
-    max-width: 90%;
-    height: 250px;
+    width: 100%;
+    max-width: 450px;
+    height: 280px;
     margin: 30px auto;
     cursor: pointer;
 }
@@ -89,7 +157,7 @@ th,td{
     text-align: center;
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     transform-style: preserve-3d;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     border-radius: 20px;
 }
 
@@ -106,184 +174,238 @@ th,td{
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: bold;
     border-radius: 20px;
     background: white;
     padding: 20px;
     box-sizing: border-box;
+    word-break: break-word;
 }
 
 .card-back {
     transform: rotateY(180deg);
-    color: #C493BF;
+    color: #db2777;
+    background: #FFFCFC;
 }
 
 .card-container:hover .card-inner:not(.is-flipped) {
     transform: scale(1.02);
 }
 
-/* ---------------------------------- */
-
+/* --- Interfaces d'apprentissage & Boutons --- */
 .stats {
     display:flex;
-    gap:30px;
+    gap:20px;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
 }
 
 .actions{
     display:flex;
     justify-content:center;
     gap:15px;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.actions button {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 button{
     border:none;
-    padding:12px 20px;
+    padding:14px 24px;
     border-radius:8px;
     cursor:pointer;
+    font-family: inherit;
 }
 
-/* Style de base propre au bouton commencer */
+/* Bouton commencer */
 .commencer {
-    padding: 0;
-    margin: 0;
-    border: none;
     background: none;
-    cursor: pointer;
-}
-
-/* Variables et positionnement */
-.commencer {
+    padding: 0;
+    margin: 20px 0 0 0;
     --primary-color: #111;
-    --hovered-color: #db2777; /* Modifié en rose pour ton thème */
+    --hovered-color: #db2777;
     position: relative;
-    display: flex;
-    font-weight: 600;
-    font-size: 20px;
-    gap: 0.5rem;
+    display: inline-flex;
+    font-weight: 700;
     align-items: center;
 }
 
-/* Style du texte interne */
 .commencer p {
     margin: 0;
-    position: relative;
-    font-size: 20px;
+    font-size: 22px;
     color: var(--primary-color);
+    position: relative;
+    transition: color 0.3s;
 }
 
-/* Barre de soulignement animée */
 .commencer::after {
     position: absolute;
     content: "";
     width: 0;
     left: 0;
-    bottom: -7px;
+    bottom: -4px;
     background: var(--hovered-color);
-    height: 2px;
+    height: 3px;
     transition: 0.3s ease-out;
 }
 
-/* Effet de texte qui se colore par-dessus */
-.commencer p::before {
-    position: absolute;
-    content: "Subscribe";
-    width: 0%;
-    inset: 0;
-    color: var(--hovered-color);
-    overflow: hidden;
-    transition: 0.3s ease-out;
-}
-
-/* Déclenchement des animations au survol (hover) */
 .commencer:hover::after {
     width: 100%;
 }
-
-.commencer:hover p::before {
-    width: 100%;
+.commencer:hover p {
+    color: var(--hovered-color);
 }
 
-.good{
-    background:#22c55e;
-    color:white;
-}
-.good:hover{
-    background:#1AA34C;
-    color:white;
-}
+/* Boutons d'action cartes */
+.good{ background:#22c55e; color:white; }
+.good:hover{ background:#1aa34c; }
 
-.bad{
-    background:#ef4444;
-    color:white;
-}
-.bad:hover{
-    background:#D13030;
-    color:white;
-}
-.ajouter:hover{
- background:#AD9E9E;
-}
+.bad{ background:#ef4444; color:white; }
+.bad:hover{ background:#d13030; }
 
+/* Boutons d'action tableau */
+.edit-btn { background: #493A98; color: white; padding: 6px 12px; border-radius: 6px; margin-right: 4px;}
+.edit-btn:hover { background: #5946B9; }
+
+.delete-btn{ background:#dc2626; color:white; padding:6px 12px; border-radius:4px; }
+.delete-btn:hover{ background:#b91c1c; }
+
+.save-btn { background: #22c55e; color: white; padding: 6px 12px; border-radius: 6px; margin-right: 4px;}
+.save-btn:hover { background: #16a34a; }
+
+.cancel-btn { background: #64748b; color: white; padding: 6px 12px; border-radius: 6px; }
+.cancel-btn:hover { background: #475569; }
 
 .reset{
     display:block;
-    margin:25px auto;
+    margin:35px auto;
     background:#64748b;
     color:white;
+    font-weight: 500;
 }
+.reset:hover { background: #475569; }
 
-.delete-btn{
-    background:#dc2626;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:4px;
-    cursor:pointer;
-}
-
-@media(max-width:600px){
-    nav{
-        flex-wrap:wrap;
-    }
-
-    .card-container {
-        height: 180px;
-    }
-
-    .card-front, .card-back {
-        font-size: 1.5rem;
-    }
-}
-
-/**************************************************/
+/* Titres H1 */
 h1 {
     font-size: 2.2rem;
-    color: #0f172a; /* Bleu-noir très moderne */
+    color: #1e1b4b;
     font-weight: 800;
     letter-spacing: -0.5px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     position: relative;
     padding-bottom: 10px;
-}
-
-h1 {
-    font-size: 2.2rem;
-    color: #1e1b4b; /* Un bleu-noir très sombre qui fait ressortir le rose */
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 20px;
-    position: relative;
-    padding-bottom: 10px;
+    text-align: center;
 }
 
 h1::after {
     content: "";
     position: absolute;
     bottom: 0;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     width: 60px;
     height: 4px;
     background: linear-gradient(to right, #db2777, #f472b6 );
     border-radius: 2px;
+}
+
+/* --- MEDIA QUERIES (RESPONSIVE) --- */
+
+@media(max-width: 768px) {
+    /* Menu sur mobile */
+    nav {
+        flex-wrap: wrap;
+        padding: 10px;
+        gap: 8px;
+    }
+    nav button {
+        flex: 1 1 calc(50% - 8px); /* 2 boutons par ligne */
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    /* Formulaire d'ajout vertical */
+    .add-word {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .add-word input, .ajouter {
+        width: 100%;
+    }
+
+    /* Transformation du tableau en liste de bloc "Cards" pour éviter le scroll */
+    table, thead, tbody, th, td, tr { 
+        display: block; 
+    }
+    
+    thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    tr { 
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        padding: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    
+    td { 
+        border: none;
+        border-bottom: 1px solid #f1f5f9; 
+        position: relative;
+        padding-left: 45%; 
+        text-align: right;
+    }
+    
+    td:last-child {
+        border-bottom: none;
+        text-align: center;
+        padding-left: 14px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* Ajout des labels automatiques en face des valeurs */
+    td:nth-of-type(1):before { content: "Anglais :"; left: 14px; position: absolute; font-weight: bold; text-align: left; }
+    td:nth-of-type(2):before { content: "Français :"; left: 14px; position: absolute; font-weight: bold; text-align: left; }
+    td:nth-of-type(3):before { content: "Description :"; left: 14px; position: absolute; font-weight: bold; text-align: left; }
+    
+    .table-input {
+        width: 100%;
+        text-align: right;
+    }
+}
+
+@media(max-width: 480px){
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    nav button {
+        flex: 1 1 100%; /* 1 bouton par ligne sur très petit écran */
+    }
+
+    .card-container {
+        height: 220px;
+    }
+
+    .card-front, .card-back {
+        font-size: 1.6rem;
+    }
+    
+    .stats {
+        font-size: 1rem;
+    }
 }
